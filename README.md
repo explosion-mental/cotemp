@@ -80,14 +80,16 @@ gcc -Wall -Wextra -Werror -pedantic -std=c99 -O2 -I /usr/X11R6/include xsct.c -o
 
 Provided that xsct binary is located in your `$PATH`, execute it using the following command:
 ~~~sh
-xsct 3700
+xsct 3700 0.9
 ~~~
 
 The first parameter (`3700` above) represents the color temperature.  
 
+The second parameter (`0.9` above) represents the brightness.  
+
 If `xsct` is called with parameter 0, the color temperature is set to `6500`.  
 
-If `xsct` is called without parameters, the current display temperature is estimated.
+If `xsct` is called without parameters, the current display temperature and brightness is estimated.
 
 The following options, which can be specified before the optional temperature parameter, are supported:
 - `-h`, `--help`: display the help page
@@ -98,7 +100,7 @@ The following options, which can be specified before the optional temperature pa
 
 Test xsct using the following command:
 ~~~sh
-xsct 3700 && xsct
+xsct 3700 0.9 && xsct
 ~~~
 
 # Resources
