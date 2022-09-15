@@ -41,7 +41,7 @@ struct temp_status
 static void usage(void)
 {
 	printf("cotemp " VERSION "\n"
-		"Usage: cotemp [options] [temperature] [brightness]\n"
+		"Usage: cotemp [options] [-t temperature] [-b brightness]\n"
 		"\tIf the argument is 0, cotemp resets the display to the default temperature (6500K)\n"
 		"\tIf no arguments are passed, cotemp estimates the current display temperature and brightness\n"
 		"Options:\n"
@@ -49,7 +49,10 @@ static void usage(void)
 		"\t-v, --verbose \t cotemp will display debugging information\n"
 		"\t-d, --delta\t cotemp will shift temperature by the temperature value\n"
 		"\t-s, --screen N\t cotemp will only select screen specified by given zero-based index\n"
+		"\t-t, --temperature N\t cotemp will only select screen specified by given zero-based index\n"
+		"\t-b, --brightness N\t cotemp will only select screen specified by given zero-based index\n"
 		"\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n");
+	exit(0);
 }
 
 static double DoubleTrim(double x, double a, double b)
@@ -197,83 +200,74 @@ int main(int argc, char **argv)
 	crtc_specified = -1;
 	temp.temp = DELTA_MIN;
 	temp.brightness = -1.0;
-	for (i = 1; i < argc; i++) {
-		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"--help") == 0))
-			fhelp = 1;
-		else if ((strcmp(argv[i],"-v") == 0) || (strcmp(argv[i],"--verbose") == 0))
-			fdebug = 1;
-		else if ((strcmp(argv[i],"-d") == 0) || (strcmp(argv[i],"--delta") == 0))
+
+	for (i = 1; i < argc; i++)
+		/* these options take no arguments */
+		if (!strcmp(argv[i], "-d")
+		|| !strcmp(argv[i], "--delta")) {
 			fdelta = 1;
-		else if ((strcmp(argv[i],"-s") == 0) || (strcmp(argv[i],"--screen") == 0)) {
-			i++;
-			if (i < argc) {
-				screen_specified = atoi(argv[i]);
-			} else {
-				fprintf(stderr, "ERROR! Required value for screen not specified!\n");
-				fhelp = 1;
-			}
-		} else if ((strcmp(argv[i],"-c") == 0) || (strcmp(argv[i],"--crtc") == 0)) {
-			i++;
-			if (i < argc) {
-				crtc_specified = atoi(argv[i]);
-			} else {
-				fprintf(stderr, "ERROR! Required value for crtc not specified!\n");
-				fhelp = 1;
-			}
-		} else if (temp.temp == DELTA_MIN)
+		} else if (i + 1 == argc) {
+			usage();
+		/* these options take one argument */
+		} else if (!strcmp(argv[i], "-s")
+			|| !strcmp(argv[i], "--screen")) {
+			screen_specified = atoi(argv[i]);
+		} else if (!strcmp(argv[i], "-c")
+			|| !strcmp(argv[i], "--crtc")) {
+			crtc_specified = atoi(argv[i]);
+		} else if (!strcmp(argv[i], "-t")
+			|| !strcmp(argv[i], "--temperature")) {
 			temp.temp = atoi(argv[i]);
-		else if (temp.brightness < 0.0)
+		} else if (!strcmp(argv[i], "-b")
+			|| !strcmp(argv[i], "--brightness")) {
 			temp.brightness = atof(argv[i]);
-		else {
-			fprintf(stderr, "ERROR! Unknown parameter: %s\n!", argv[i]);
-			fhelp = 1;
-		}
+		} else
+			usage();
+
+	/* make sure values are correct */
+	if (screen_specified >= screens) {
+		fprintf(stderr, "ERROR! Invalid screen index: %d!\n", screen_specified);
+		return 1;
 	}
 
-	if (fhelp > 0) {
-		usage();
-	} else if (screen_specified >= screens) {
-		fprintf(stderr, "ERROR! Invalid screen index: %d!\n", screen_specified);
-	} else {
-		if (temp.brightness < 0.0)
-			temp.brightness = 1.0;
-		if (screen_specified >= 0) {
-			screen_first = screen_specified;
-			screen_last = screen_specified;
+	/* run */
+	if (temp.brightness < 0.0)
+		temp.brightness = 1.0;
+	if (screen_specified >= 0) {
+		screen_first = screen_specified;
+		screen_last = screen_specified;
+	}
+	if ((temp.temp < 0) && (fdelta == 0)) {
+		// No arguments, so print estimated temperature for each screen
+		for (screen = screen_first; screen <= screen_last; screen++) {
+			temp = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+			printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
 		}
-		if ((temp.temp < 0) && (fdelta == 0)) {
-			// No arguments, so print estimated temperature for each screen
-			for (screen = screen_first; screen <= screen_last; screen++) {
-				temp = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
-				printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
+	} else {
+		if (fdelta == 0) {
+			// Set temperature to given value or default for a value of 0
+			if (temp.temp == 0) {
+				temp.temp = TEMPERATURE_NORM;
+			} else if (temp.temp < TEMPERATURE_ZERO) {
+				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
+				temp.temp = TEMPERATURE_ZERO;
+			} for (screen = screen_first; screen <= screen_last; screen++) {
+				sct_for_screen(dpy, screen, crtc_specified, temp, fdebug);
 			}
 		} else {
-			if (fdelta == 0) {
-				// Set temperature to given value or default for a value of 0
-				if (temp.temp == 0) {
-					temp.temp = TEMPERATURE_NORM;
-				} else if (temp.temp < TEMPERATURE_ZERO) {
+			// Delta mode: Shift temperature of each screen by given value
+			for (screen = screen_first; screen <= screen_last; screen++) {
+				struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+				tempd.temp += temp.temp;
+				if (tempd.temp < TEMPERATURE_ZERO) {
 					fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-					temp.temp = TEMPERATURE_ZERO;
-				} for (screen = screen_first; screen <= screen_last; screen++) {
-					sct_for_screen(dpy, screen, crtc_specified, temp, fdebug);
+					tempd.temp = TEMPERATURE_ZERO;
 				}
-			} else {
-				// Delta mode: Shift temperature of each screen by given value
-				for (screen = screen_first; screen <= screen_last; screen++) {
-					struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
-					tempd.temp += temp.temp;
-					if (tempd.temp < TEMPERATURE_ZERO) {
-						fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-						tempd.temp = TEMPERATURE_ZERO;
-					}
-					sct_for_screen(dpy, screen, crtc_specified, tempd, fdebug);
-				}
+				sct_for_screen(dpy, screen, crtc_specified, tempd, fdebug);
 			}
 		}
 	}
 
 	XCloseDisplay(dpy);
-
 	return EXIT_SUCCESS;
 }
