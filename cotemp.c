@@ -231,10 +231,8 @@ int main(int argc, char **argv)
 	/* make sure values are correct */
 	if (screen_specified >= screens) {
 		fprintf(stderr, "ERROR! Invalid screen index: %d!\n", screen_specified);
-		return 1;
+		return EXIT_FAILURE;
 	}
-
-	/* run */
 	if (temp.brightness < 0.0)
 		temp.brightness = 1.0;
 	if (screen_specified >= 0) {
@@ -242,6 +240,7 @@ int main(int argc, char **argv)
 		screen_last = screen_specified;
 	}
 
+	/* run */
 	if (fdelta == 0) {
 		// Set temperature to given value or default for a value of 0
 		if (temp.temp == 0) {
