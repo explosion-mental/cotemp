@@ -201,6 +201,14 @@ int main(int argc, char **argv)
 	temp.temp = DELTA_MIN;
 	temp.brightness = -1.0;
 
+	if (argc < 2) { // No arguments, so print estimated temperature for each screen
+		for (screen = screen_first; screen <= screen_last; screen++) {
+			temp = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+			printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
+		}
+	}
+
+
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-d")
@@ -237,34 +245,27 @@ int main(int argc, char **argv)
 		screen_first = screen_specified;
 		screen_last = screen_specified;
 	}
-	if ((temp.temp < 0) && (fdelta == 0)) {
-		// No arguments, so print estimated temperature for each screen
-		for (screen = screen_first; screen <= screen_last; screen++) {
-			temp = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
-			printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
+
+	if (fdelta == 0) {
+		// Set temperature to given value or default for a value of 0
+		if (temp.temp == 0) {
+			temp.temp = TEMPERATURE_NORM;
+		} else if (temp.temp < TEMPERATURE_ZERO) {
+			fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
+			temp.temp = TEMPERATURE_ZERO;
+		} for (screen = screen_first; screen <= screen_last; screen++) {
+			sct_for_screen(dpy, screen, crtc_specified, temp, fdebug);
 		}
 	} else {
-		if (fdelta == 0) {
-			// Set temperature to given value or default for a value of 0
-			if (temp.temp == 0) {
-				temp.temp = TEMPERATURE_NORM;
-			} else if (temp.temp < TEMPERATURE_ZERO) {
+		// Delta mode: Shift temperature of each screen by given value
+		for (screen = screen_first; screen <= screen_last; screen++) {
+			struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+			tempd.temp += temp.temp;
+			if (tempd.temp < TEMPERATURE_ZERO) {
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-				temp.temp = TEMPERATURE_ZERO;
-			} for (screen = screen_first; screen <= screen_last; screen++) {
-				sct_for_screen(dpy, screen, crtc_specified, temp, fdebug);
+				tempd.temp = TEMPERATURE_ZERO;
 			}
-		} else {
-			// Delta mode: Shift temperature of each screen by given value
-			for (screen = screen_first; screen <= screen_last; screen++) {
-				struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
-				tempd.temp += temp.temp;
-				if (tempd.temp < TEMPERATURE_ZERO) {
-					fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-					tempd.temp = TEMPERATURE_ZERO;
-				}
-				sct_for_screen(dpy, screen, crtc_specified, tempd, fdebug);
-			}
+			sct_for_screen(dpy, screen, crtc_specified, tempd, fdebug);
 		}
 	}
 
