@@ -1,5 +1,5 @@
 # cotemp version
-VERSION = v0.0
+VERSION = v0.1
 
 # cotemp git exact commit version
 SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
