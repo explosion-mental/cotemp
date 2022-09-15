@@ -225,10 +225,10 @@ int main(int argc, char **argv)
 			crtc_specified = atoi(argv[i]);
 		} else if (!strcmp(argv[i], "-t")
 			|| !strcmp(argv[i], "--temperature")) {
-			temp.temp = atoi(argv[i]);
+			temp.temp = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-b")
 			|| !strcmp(argv[i], "--brightness")) {
-			temp.brightness = atof(argv[i]);
+			temp.brightness = atof(argv[++i]);
 		} else
 			usage();
 
