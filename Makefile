@@ -7,7 +7,7 @@ MAN ?= $(PREFIX)/share/man/man1
 INSTALL ?= install
 
 PROG = cotemp
-SRCS = src/cotemp.c
+SRCS = cotemp.c
 
 LIBS = -lX11 -lXrandr -lm
 
