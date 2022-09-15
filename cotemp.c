@@ -1,9 +1,3 @@
-/*
- * cotemp - X11 set color temperature
- *
- * Public domain, do as you wish.
- */
-
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
