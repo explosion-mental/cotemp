@@ -41,7 +41,7 @@ struct temp_status
 static void usage(void)
 {
 	printf("cotemp " VERSION "\n"
-		"Usage: cotemp [options] [-t temperature] [-b brightness]\n"
+		"Usage: cotemp [options] [temperature] [brightness]\n"
 		"\tIf the argument is 0, cotemp resets the display to the default temperature (6500K)\n"
 		"\tIf no arguments are passed, cotemp estimates the current display temperature and brightness\n"
 		"Options:\n"
@@ -49,8 +49,6 @@ static void usage(void)
 		"\t-v, --verbose \t cotemp will display debugging information\n"
 		"\t-d, --delta\t cotemp will shift temperature by the temperature value\n"
 		"\t-s, --screen N\t cotemp will only select screen specified by given zero-based index\n"
-		"\t-t, --temperature N\t cotemp will only select screen specified by given zero-based index\n"
-		"\t-b, --brightness N\t cotemp will only select screen specified by given zero-based index\n"
 		"\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n");
 	exit(0);
 }
@@ -214,6 +212,10 @@ int main(int argc, char **argv)
 		if (!strcmp(argv[i], "-d")
 		|| !strcmp(argv[i], "--delta")) {
 			fdelta = 1;
+		} else if (temp.temp == DELTA_MIN) { /* first arg without flag */
+			temp.temp = atoi(argv[i]);
+		} else if (temp.brightness == -1.0) { /* second arg without flag */
+			temp.brightness = atof(argv[i]);
 		} else if (i + 1 == argc) {
 			usage();
 		/* these options take one argument */
@@ -223,12 +225,6 @@ int main(int argc, char **argv)
 		} else if (!strcmp(argv[i], "-c")
 			|| !strcmp(argv[i], "--crtc")) {
 			crtc_specified = atoi(argv[i]);
-		} else if (!strcmp(argv[i], "-t")
-			|| !strcmp(argv[i], "--temperature")) {
-			temp.temp = atoi(argv[++i]);
-		} else if (!strcmp(argv[i], "-b")
-			|| !strcmp(argv[i], "--brightness")) {
-			temp.brightness = atof(argv[++i]);
 		} else
 			usage();
 
