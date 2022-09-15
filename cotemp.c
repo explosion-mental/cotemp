@@ -40,16 +40,7 @@ struct temp_status
 
 static void usage(void)
 {
-	printf("cotemp " VERSION "\n"
-		"Usage: cotemp [options] [temperature] [brightness]\n"
-		"\tIf the argument is 0, cotemp resets the display to the default temperature (6500K)\n"
-		"\tIf no arguments are passed, cotemp estimates the current display temperature and brightness\n"
-		"Options:\n"
-		"\t-h, --help \t cotemp will display this usage information\n"
-		"\t-v, --verbose \t cotemp will display debugging information\n"
-		"\t-d, --delta\t cotemp will shift temperature by the temperature value\n"
-		"\t-s, --screen N\t cotemp will only select screen specified by given zero-based index\n"
-		"\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n");
+	fprintf(stderr, "Usage: cotemp [-d] [-s screen] [-c crtc] [temperature] [brightness]\n");
 	exit(0);
 }
 
@@ -182,7 +173,7 @@ int main(int argc, char **argv)
 	int i, screen, screens;
 	int screen_specified, screen_first, screen_last, crtc_specified;
 	struct temp_status temp;
-	int fdebug = 0, fdelta = 0, fhelp = 0;
+	int fdebug = 0, fdelta = 0;
 	Display *dpy = XOpenDisplay(NULL);
 
 	if (!dpy) {
@@ -209,8 +200,12 @@ int main(int argc, char **argv)
 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
-		if (!strcmp(argv[i], "-d")
-		|| !strcmp(argv[i], "--delta")) {
+		if (!strcmp(argv[i], "-v") /* prints version information */
+		|| !strcmp(argv[i], "--version")) {
+			puts("cotemp-"VERSION);
+			exit(0);
+		} else if (!strcmp(argv[i], "-d")
+			|| !strcmp(argv[i], "--delta")) {
 			fdelta = 1;
 		} else if (temp.temp == DELTA_MIN) { /* first arg without flag */
 			temp.temp = atoi(argv[i]);
