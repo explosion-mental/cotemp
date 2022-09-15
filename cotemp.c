@@ -44,6 +44,10 @@ struct temp_status
 	double brightness;
 };
 
+/* variables */
+static Display *dpy;
+static Window root;
+
 static void usage(void)
 {
 	fprintf(stderr, "usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]\n");
@@ -56,9 +60,8 @@ static double DoubleTrim(double x, double a, double b)
 	return buff[ (int)(x > a) + (int)(x > b) ];
 }
 
-static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc)
+static struct temp_status get_sct_for_screen(int screen, int icrtc)
 {
-	Window root = RootWindow(dpy, screen);
 	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
 
 	int n, c;
@@ -115,11 +118,10 @@ static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc
 	return temp;
 }
 
-static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp)
+static void sct_for_screen(int screen, int icrtc, struct temp_status temp)
 {
 	double t = 0.0, b = 1.0, g = 0.0, gammar, gammag, gammab;
 	int n, c;
-	Window root = RootWindow(dpy, screen);
 	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
 
 	t = (double)temp.temp;
@@ -178,13 +180,13 @@ int main(int argc, char **argv)
 	int screen_specified, screen_first, screen_last, crtc_specified;
 	struct temp_status temp;
 	int fdelta = 0;
-	Display *dpy = XOpenDisplay(NULL);
 
-	if (!dpy) {
-		perror("XOpenDisplay(NULL) failed");
+	if (!(dpy = XOpenDisplay(NULL))) {
 		fprintf(stderr, "ERROR! Ensure DISPLAY is set correctly!\n");
 		return EXIT_FAILURE;
 	}
+	root = RootWindow(dpy, DefaultScreen(dpy));
+
 
 	screens = XScreenCount(dpy);
 	screen_first = 0;
@@ -196,11 +198,10 @@ int main(int argc, char **argv)
 
 	if (argc < 2) { // No arguments, so print estimated temperature for each screen
 		for (screen = screen_first; screen <= screen_last; screen++) {
-			temp = get_sct_for_screen(dpy, screen, crtc_specified);
+			temp = get_sct_for_screen(screen, crtc_specified);
 			printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
 		}
 	}
-
 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
@@ -250,18 +251,18 @@ int main(int argc, char **argv)
 			fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
 			temp.temp = TEMPERATURE_ZERO;
 		} for (screen = screen_first; screen <= screen_last; screen++) {
-			sct_for_screen(dpy, screen, crtc_specified, temp);
+			sct_for_screen(screen, crtc_specified, temp);
 		}
 	} else {
 		// Delta mode: Shift temperature of each screen by given value
 		for (screen = screen_first; screen <= screen_last; screen++) {
-			struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified);
+			struct temp_status tempd = get_sct_for_screen(screen, crtc_specified);
 			tempd.temp += temp.temp;
 			if (tempd.temp < TEMPERATURE_ZERO) {
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
 				tempd.temp = TEMPERATURE_ZERO;
 			}
-			sct_for_screen(dpy, screen, crtc_specified, tempd);
+			sct_for_screen(screen, crtc_specified, tempd);
 		}
 	}
 
