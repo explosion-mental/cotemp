@@ -207,10 +207,10 @@ int main(int argc, char **argv)
 		/* these options take one argument */
 		} else if (!strcmp(argv[i], "-s")
 			|| !strcmp(argv[i], "--screen")) {
-			screen_specified = atoi(argv[i]);
+			screen_specified = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-c")
 			|| !strcmp(argv[i], "--crtc")) {
-			crtc_specified = atoi(argv[i]);
+			crtc_specified = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-t")
 			|| !strcmp(argv[i], "--temperature")) {
 			temp = atoi(argv[++i]);
