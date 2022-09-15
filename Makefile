@@ -1,28 +1,51 @@
-CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Werror -pedantic -std=c99 -O2 -I /usr/X11R6/include
-LDFLAGS ?= -L /usr/X11R6/lib -s
-PREFIX ?= /usr
-BIN ?= $(PREFIX)/bin
-MAN ?= $(PREFIX)/share/man/man1
-INSTALL ?= install
+# scaf - simple auto cpu freq
+# See LICENSE file for copyright and license details.
 
-PROG = cotemp
-SRCS = cotemp.c
+include config.mk
 
-LIBS = -lX11 -lXrandr -lm
+SRC = cotemp.c
+OBJ = ${SRC:.c=.o}
 
-$(PROG): $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+all: options cotemp
 
-install: $(PROG) $(PROG).1
-	$(INSTALL) -d $(DESTDIR)$(BIN)
-	$(INSTALL) -m 0755 $(PROG) $(DESTDIR)$(BIN)
-	$(INSTALL) -d $(DESTDIR)$(MAN)
-	$(INSTALL) -m 0644 $(PROG).1 $(DESTDIR)$(MAN)
+options:
+	@echo cotemp build options:
+	@echo "VERSION  = ${VERSION}"
+	@echo "CFLAGS   = ${CFLAGS}"
+	@echo "LDFLAGS  = ${LDFLAGS}"
+	@echo "CC       = ${CC}"
 
-uninstall:
-	rm -f $(BIN)/$(PROG)
-	rm -f $(MAN)/$(PROG).1
+config.h:
+	cp config.def.h config.h
+
+.c.o:
+	${CC} -c ${CFLAGS} $<
+
+${OBJ}: config.h config.mk
+
+cotemp: ${OBJ}
+	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
-	rm -f $(PROG)
+	rm -f cotemp ${OBJ} cotemp-${VERSION}.tar.gz
+
+dist: clean
+	mkdir -p cotemp-${VERSION}
+	cp -R LICENSE Makefile README.md config.mk config.def.h ${SRC} cotemp.1 cotemp-${VERSION}
+	tar -cf cotemp-${VERSION}.tar cotemp-${VERSION}
+	gzip cotemp-${VERSION}.tar
+	rm -rf cotemp-${VERSION}
+
+install: all
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f cotemp ${DESTDIR}${PREFIX}/bin
+	chmod 755 ${DESTDIR}${PREFIX}/bin/cotemp
+	mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	sed "s/VERSION/${VERSION}/g" < cotemp.1 > ${DESTDIR}${MANPREFIX}/man1/cotemp.1
+	chmod 644 ${DESTDIR}${MANPREFIX}/man1/cotemp.1
+
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/cotemp \
+		${DESTDIR}${MANPREFIX}/man1/cotemp.1
+
+.PHONY: all options clean dist install uninstall

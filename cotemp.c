@@ -8,8 +8,6 @@
 #include <string.h>
 #include <math.h>
 
-#define XSCT_VERSION "1.9"
-
 #define TEMPERATURE_NORM    6500
 #define TEMPERATURE_ZERO    700
 #define GAMMA_MULT          65535.0
@@ -48,8 +46,8 @@ static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_stat
 
 static void usage(char * pname)
 {
-    printf("Xsct (%s)\n"
-           "Usage: %s [options] [temperature] [brightness]\n"
+    printf("cotemp " VERSION "\n"
+           "Usage: cotemp [options] [temperature] [brightness]\n"
            "\tIf the argument is 0, cotemp resets the display to the default temperature (6500K)\n"
            "\tIf no arguments are passed, cotemp estimates the current display temperature and brightness\n"
            "Options:\n"
@@ -57,7 +55,7 @@ static void usage(char * pname)
            "\t-v, --verbose \t cotemp will display debugging information\n"
            "\t-d, --delta\t cotemp will shift temperature by the temperature value\n"
            "\t-s, --screen N\t cotemp will only select screen specified by given zero-based index\n"
-           "\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n", XSCT_VERSION, pname);
+           "\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n");
 }
 
 static double DoubleTrim(double x, double a, double b)
