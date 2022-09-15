@@ -6,8 +6,8 @@ BIN ?= $(PREFIX)/bin
 MAN ?= $(PREFIX)/share/man/man1
 INSTALL ?= install
 
-PROG = xsct
-SRCS = src/xsct.c
+PROG = cotemp
+SRCS = src/cotemp.c
 
 LIBS = -lX11 -lXrandr -lm
 

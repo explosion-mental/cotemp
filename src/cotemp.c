@@ -1,23 +1,23 @@
 /*
- * xsct - X11 set color temperature
+ * cotemp - X11 set color temperature
  *
  * Public domain, do as you wish.
  */
 
-#include "xsct.h"
+#include "cotemp.h"
 
 static void usage(char * pname)
 {
     printf("Xsct (%s)\n"
            "Usage: %s [options] [temperature] [brightness]\n"
-           "\tIf the argument is 0, xsct resets the display to the default temperature (6500K)\n"
-           "\tIf no arguments are passed, xsct estimates the current display temperature and brightness\n"
+           "\tIf the argument is 0, cotemp resets the display to the default temperature (6500K)\n"
+           "\tIf no arguments are passed, cotemp estimates the current display temperature and brightness\n"
            "Options:\n"
-           "\t-h, --help \t xsct will display this usage information\n"
-           "\t-v, --verbose \t xsct will display debugging information\n"
-           "\t-d, --delta\t xsct will shift temperature by the temperature value\n"
-           "\t-s, --screen N\t xsct will only select screen specified by given zero-based index\n"
-           "\t-c, --crtc N\t xsct will only select CRTC specified by given zero-based index\n", XSCT_VERSION, pname);
+           "\t-h, --help \t cotemp will display this usage information\n"
+           "\t-v, --verbose \t cotemp will display debugging information\n"
+           "\t-d, --delta\t cotemp will shift temperature by the temperature value\n"
+           "\t-s, --screen N\t cotemp will only select screen specified by given zero-based index\n"
+           "\t-c, --crtc N\t cotemp will only select CRTC specified by given zero-based index\n", XSCT_VERSION, pname);
 }
 
 static double DoubleTrim(double x, double a, double b)

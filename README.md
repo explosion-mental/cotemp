@@ -1,7 +1,8 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/faf0/sct)
-![GitHub Release Date](https://img.shields.io/github/release-date/faf0/sct)
-![GitHub repo size](https://img.shields.io/github/repo-size/faf0/sct)
-![GitHub](https://img.shields.io/github/license/faf0/sct)  
+# cotemp - Color Temperature
+
+This is a fork of https://github.com/faf0/sct in which I'll be adding some nice
+things that I think make the program even easier and simple to use but it will
+go out of the way of `sct`.
 
 # About
 
@@ -83,11 +84,11 @@ Provided that xsct binary is located in your `$PATH`, execute it using the follo
 xsct 3700 0.9
 ~~~
 
-The first parameter (`3700` above) represents the color temperature.  
+The first parameter (`3700` above) represents the color temperature.
 
-The second parameter (`0.9` above) represents the brightness.  
+The second parameter (`0.9` above) represents the brightness.
 
-If `xsct` is called with parameter 0, the color temperature is set to `6500`.  
+If `xsct` is called with parameter 0, the color temperature is set to `6500`.
 
 If `xsct` is called without parameters, the current display temperature and brightness is estimated.
 
@@ -107,7 +108,3 @@ xsct 3700 0.9 && xsct
 
 The following website by Mitchell Charity provides a table for the conversion between black-body temperatures and color pixel values:
 http://www.vendian.org/mncharity/dir3/blackbody/
-
----
-
-https://github.com/faf0/sct/
