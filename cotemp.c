@@ -32,6 +32,12 @@
 #define BRIGHTHESS_DIV      65470.988
 #define DELTA_MIN           -1000000
 
+#ifdef DEBUG
+#define debug(...)		do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
+#else
+#define debug(...)
+#endif /* DEBUG */
+
 struct temp_status
 {
 	int temp;
@@ -50,7 +56,7 @@ static double DoubleTrim(double x, double a, double b)
 	return buff[ (int)(x > a) + (int)(x > b) ];
 }
 
-static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc, int fdebug)
+static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc)
 {
 	Window root = RootWindow(dpy, screen);
 	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
@@ -90,8 +96,7 @@ static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc
 		temp.brightness /= n;
 		temp.brightness /= BRIGHTHESS_DIV;
 		temp.brightness = DoubleTrim(temp.brightness, 0.0, 1.0);
-		if (fdebug > 0)
-			fprintf(stderr, "DEBUG: Gamma: %f, %f, %f, brightness: %f\n", gammar, gammag, gammab, temp.brightness);
+		debug("Gamma: %f, %f, %f, brightness: %f\n", gammar, gammag, gammab, temp.brightness);
 		gammad = gammab - gammar;
 		if (gammad < 0.0) {
 			if (gammab > 0.0) {
@@ -110,7 +115,7 @@ static struct temp_status get_sct_for_screen(Display *dpy, int screen, int icrtc
 	return temp;
 }
 
-static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp, int fdebug)
+static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_status temp)
 {
 	double t = 0.0, b = 1.0, g = 0.0, gammar, gammag, gammab;
 	int n, c;
@@ -135,8 +140,7 @@ static void sct_for_screen(Display *dpy, int screen, int icrtc, struct temp_stat
 		gammag = DoubleTrim(GAMMA_K0GB + GAMMA_K1GB * g, 0.0, 1.0);
 		gammab = 1.0;
 	}
-	if (fdebug > 0)
-		fprintf(stderr, "DEBUG: Gamma: %f, %f, %f, brightness: %f\n", gammar, gammag, gammab, b);
+	debug("Gamma: %f, %f, %f, brightness: %f\n", gammar, gammag, gammab, b);
 
 	n = res->ncrtc;
 
@@ -173,7 +177,7 @@ int main(int argc, char **argv)
 	int i, screen, screens;
 	int screen_specified, screen_first, screen_last, crtc_specified;
 	struct temp_status temp;
-	int fdebug = 0, fdelta = 0;
+	int fdelta = 0;
 	Display *dpy = XOpenDisplay(NULL);
 
 	if (!dpy) {
@@ -192,7 +196,7 @@ int main(int argc, char **argv)
 
 	if (argc < 2) { // No arguments, so print estimated temperature for each screen
 		for (screen = screen_first; screen <= screen_last; screen++) {
-			temp = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+			temp = get_sct_for_screen(dpy, screen, crtc_specified);
 			printf("Screen %d: temperature ~ %d %f\n", screen, temp.temp, temp.brightness);
 		}
 	}
@@ -246,18 +250,18 @@ int main(int argc, char **argv)
 			fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
 			temp.temp = TEMPERATURE_ZERO;
 		} for (screen = screen_first; screen <= screen_last; screen++) {
-			sct_for_screen(dpy, screen, crtc_specified, temp, fdebug);
+			sct_for_screen(dpy, screen, crtc_specified, temp);
 		}
 	} else {
 		// Delta mode: Shift temperature of each screen by given value
 		for (screen = screen_first; screen <= screen_last; screen++) {
-			struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified, fdebug);
+			struct temp_status tempd = get_sct_for_screen(dpy, screen, crtc_specified);
 			tempd.temp += temp.temp;
 			if (tempd.temp < TEMPERATURE_ZERO) {
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
 				tempd.temp = TEMPERATURE_ZERO;
 			}
-			sct_for_screen(dpy, screen, crtc_specified, tempd, fdebug);
+			sct_for_screen(dpy, screen, crtc_specified, tempd);
 		}
 	}
 

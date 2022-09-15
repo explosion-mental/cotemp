@@ -17,8 +17,11 @@ X11LIB = /usr/X11R6/lib
 INCS = -I ${X11INC}
 LIBS = -L ${X11LIB} -lX11 -lXrandr -lm
 
+# debug
+DEBUG = -DDEBUG
+
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200809L -DVERSION=\"${SRCVERSION}\"
+CPPFLAGS = -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200809L -DVERSION=\"${SRCVERSION}\" ${DEBUG}
 CFLAGS  = -std=c99 -pedantic -Wall -Os ${INCS} ${CPPFLAGS}
 #CFLAGS  = -g -std=c99 -pedantic -Wall -Wextra -O3 ${INCS} ${CPPFLAGS} -flto -fsanitize=address,undefined,leak
 LDFLAGS = ${LIBS}
