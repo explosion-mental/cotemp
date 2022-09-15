@@ -1,7 +1,7 @@
-# sacf version
+# cotemp version
 VERSION = v0.0
 
-# sacf git exact commit version
+# cotemp git exact commit version
 SRCVERSION = $$(git describe --tags --dirty=[modified] 2>/dev/null || echo ${VERSION}-nogit)
 
 # Customize below to fit your system
