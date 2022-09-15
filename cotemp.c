@@ -240,7 +240,8 @@ int main(int argc, char **argv)
 		} else if (temp < TEMPERATURE_ZERO) {
 			fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
 			temp = TEMPERATURE_ZERO;
-		} for (screen = screen_first; screen <= screen_last; screen++) {
+		}
+		for (screen = screen_first; screen <= screen_last; screen++) {
 			sct_for_screen(screen, crtc_specified);
 		}
 	} else {
