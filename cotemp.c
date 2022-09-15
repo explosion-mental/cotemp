@@ -222,7 +222,7 @@ int main(int argc, char **argv)
 
 	/* make sure values are correct */
 	if (screen_specified >= screens) {
-		fprintf(stderr, "ERROR! Invalid screen index: %d!\n", screen_specified);
+		fprintf(stderr, "Invalid screen index: '%d'\n", screen_specified);
 		return EXIT_FAILURE;
 	}
 	if (brightness < 0.0)
