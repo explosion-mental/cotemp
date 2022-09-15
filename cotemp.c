@@ -41,7 +41,7 @@
 /* variables */
 static Display *dpy;
 static Window root;
-static int temp = DELTA_MIN;
+static int temp = TEMPERATURE_NORM;
 static double brightness = -1.0;
 
 static void usage(void)
