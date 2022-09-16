@@ -162,7 +162,7 @@ static void sct_for_screen(int screen, int icrtc)
 	XFree(res);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	int i, screens, screen_first = 0, crtc_specified = -1;
 	int fdelta = 0;
