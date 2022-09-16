@@ -213,6 +213,12 @@ int main(int argc, char **argv)
 		} else if (!strcmp(argv[i], "-t")
 			|| !strcmp(argv[i], "--temperature")) {
 			temp = atoi(argv[++i]);
+			if (temp == 0)
+				temp = TEMPERATURE_NORM;
+			else if (temp < TEMPERATURE_ZERO) {
+				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", TEMPERATURE_ZERO, temp);
+				temp = TEMPERATURE_ZERO;
+			}
 		} else if (!strcmp(argv[i], "-b")
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
@@ -220,14 +226,6 @@ int main(int argc, char **argv)
 				brightness = 1.0;
 		} else
 			usage();
-
-	/* make sure values are correct */
-	if (temp == 0)
-		temp = TEMPERATURE_NORM;
-	else if (temp < TEMPERATURE_ZERO) {
-		fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-		temp = TEMPERATURE_ZERO;
-	}
 
 	/* run */
 
