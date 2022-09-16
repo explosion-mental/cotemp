@@ -248,6 +248,8 @@ int main(int argc, char *argv[])
 				get_sct_for_screen(i, crtc_specified);
 				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
 			}
+			XCloseDisplay(dpy);
+			return EXIT_SUCCESS;
 		} else if (!strcmp(argv[i], "-p")
 			|| !strcmp(argv[i], "--profile")) {
 			int found = 0;
