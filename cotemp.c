@@ -52,6 +52,7 @@ typedef struct {
 static Display *dpy;
 static int temp = TEMPERATURE_NORM;
 static double brightness = 1.0;
+static int screens = 1, screen_first = 0, crtc_specified = -1, fdelta = 0;
 
 #include "config.h"
 
@@ -193,10 +194,40 @@ static void sct_for_screen(int screen, int icrtc)
 	XFree(res);
 }
 
+static void run(void)
+{
+	int i;
+	const time_t caltime = time(NULL);
+	const struct tm *t = localtime(&caltime); /* broken down time */
+	int h, min, h2, min2;
+
+	/* get max value */
+	const Profile *p;
+	for (p = profiles; p < profiles + LENGTH(profiles); p++) {
+		hhmmfromstr(p->h1, &h, &min);
+		hhmmfromstr(p->h2, &h2, &min2);
+		if (BETWEEN(t->tm_hour * 60 + t->tm_min, h * 60 + min, h2 * 60 + min2)) {
+			temp = p->t;
+			brightness = p->b;
+			break;
+		}
+	}
+
+	// Set temperature to given value or default for a value of 0
+	for (i = screen_first; i < screens; i++) {
+		if (fdelta) { // Delta mode: Shift temperature of each screen by given value
+			get_sct_for_screen(i, crtc_specified);
+			temp += temp;
+		}
+		sct_for_screen(i, crtc_specified);
+	}
+
+}
+
+
 int main(int argc, char *argv[])
 {
-	int i, screens, screen_first = 0, crtc_specified = -1;
-	int fdelta = 0;
+	int i;
 
 	if (!(dpy = XOpenDisplay(NULL))) {
 		fprintf(stderr, "ERROR! Ensure DISPLAY is set correctly!\n");
@@ -267,32 +298,7 @@ int main(int argc, char *argv[])
 			usage();
 
 	/* run */
-	const time_t caltime = time(NULL);
-	const struct tm *t = localtime(&caltime); /* broken down time */
-	int h, min, h2, min2;
-
-	/* get max value */
-	const Profile *p;
-	for (p = profiles; p < profiles + LENGTH(profiles); p++) {
-		hhmmfromstr(p->h1, &h, &min);
-		hhmmfromstr(p->h2, &h2, &min2);
-		if (BETWEEN(t->tm_hour * 60 + t->tm_min, h * 60 + min, h2 * 60 + min2)) {
-			temp = p->t;
-			brightness = p->b;
-			break;
-		}
-	}
-
-	//printf("TIME: '%d : %d %d'\n", time->tm_hour, time->tm_min, time->tm_sec);
-
-	// Set temperature to given value or default for a value of 0
-	for (i = screen_first; i < screens; i++) {
-		if (fdelta) { // Delta mode: Shift temperature of each screen by given value
-			get_sct_for_screen(i, crtc_specified);
-			temp += temp;
-		}
-		sct_for_screen(i, crtc_specified);
-	}
+	run();
 
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
