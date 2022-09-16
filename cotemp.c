@@ -32,6 +32,7 @@
 #define BRIGHTHESS_DIV      65470.988
 #define DELTA_MIN           -1000000
 
+#define MAX(A, B)               ((A) > (B) ? (A) : (B))
 #ifdef DEBUG
 #define debug(...)		do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
 #else
@@ -81,8 +82,8 @@ static void get_sct_for_screen(int screen, int icrtc)
 
 	XFree(res);
 
-	brightness = (gammar > gammag) ? gammar : gammag;
-	brightness = (gammab > brightness) ? gammab : brightness;
+	brightness = MAX(gammar, gammag);
+	brightness = MAX(gammab, brightness);
 
 	if (brightness > 0.0 && n > 0) {
 		gammar /= brightness;
