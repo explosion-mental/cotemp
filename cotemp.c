@@ -30,7 +30,6 @@
 #define GAMMA_K0GB          1.49221604915144
 #define GAMMA_K1GB          -0.07513509588921
 #define BRIGHTHESS_DIV      65470.988
-#define DELTA_MIN           -1000000
 
 #define MAX(A, B)               ((A) > (B) ? (A) : (B))
 #ifdef DEBUG
