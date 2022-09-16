@@ -14,7 +14,7 @@ Usage
 -----
 With no arguments cotemp will start to run (forever).
 
-    cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness] [-p profile]
+    cotemp [-dlv] [-s screen] [-c crtc] [-t temperature] [-b brightness] [-p profile]
 
 For a more detail information read the man page.
 
