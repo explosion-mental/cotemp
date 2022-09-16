@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
 /* macros */
 #define MAX(A, B)               ((A) > (B) ? (A) : (B))
+#define BETWEEN(X, A, B)        ((A) <= (X) && (X) <= (B))
 #define LENGTH(X)               (sizeof(X) / sizeof(X[0]))
 #ifdef DEBUG
 #define debug(...)              do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
@@ -39,6 +41,8 @@
 
 typedef struct {
 	const char *name;
+	const char *h1;    /* starting hour */
+	const char *h2;    /* final hour */
 	const int t;    /* temperature */
 	const double b; /* brigthness */
 } Profile;
@@ -54,6 +58,23 @@ static void usage(void)
 {
 	fprintf(stderr, "usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]\n");
 	exit(0);
+}
+
+static void hhmmfromstr(const char *data, int *h, int *m)
+{
+	char *ep;
+
+	*h = (int)strtol(data, &ep, 10);
+	if (!ep || *ep != ':') {
+		fprintf(stderr, "cannot parse hour: '%s' - wrong format\n", data);
+		exit(1);
+	}
+
+	*m = (int)strtol(ep + 1, &ep, 10);
+	if (!ep || *ep != '\0') {
+		fprintf(stderr, "cannot parse minutes: '%s' - wrong format\n", data);
+		exit(1);
+	}
 }
 
 static double DoubleTrim(double x, double a, double b)
@@ -246,6 +267,23 @@ int main(int argc, char *argv[])
 			usage();
 
 	/* run */
+	const time_t caltime = time(NULL);
+	const struct tm *t = localtime(&caltime); /* broken down time */
+	int h, min, h2, min2;
+
+	/* get max value */
+	const Profile *p;
+	for (p = profiles; p < profiles + LENGTH(profiles); p++) {
+		hhmmfromstr(p->h1, &h, &min);
+		hhmmfromstr(p->h2, &h2, &min2);
+		if (BETWEEN(t->tm_hour * 60 + t->tm_min, h * 60 + min, h2 * 60 + min2)) {
+			temp = p->t;
+			brightness = p->b;
+			break;
+		}
+	}
+
+	//printf("TIME: '%d : %d %d'\n", time->tm_hour, time->tm_min, time->tm_sec);
 
 	// Set temperature to given value or default for a value of 0
 	for (i = screen_first; i < screens; i++) {
