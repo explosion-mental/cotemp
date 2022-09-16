@@ -247,6 +247,13 @@ int main(int argc, char *argv[])
 		} else if (!strcmp(argv[i], "-d") /* shift temperature value */
 			|| !strcmp(argv[i], "--delta")) {
 			fdelta = 1;
+		} else if (!strcmp(argv[i], "-l") /* output stats about screen(s) */
+			|| !strcmp(argv[i], "--list")) {
+			for (i = screen_first; i < screens; i++) {
+				get_sct_for_screen(i, crtc_specified);
+				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
+			}
+			exit(0);
 		} else if (i + 1 == argc) {
 			usage();
 		/* these options take one argument */
@@ -268,17 +275,14 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
 				temp = LowestTemp;
 			}
+			run();
+			exit(0);
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
-		} else if (!strcmp(argv[i], "-l") /* output stats about screen(s) */
-			|| !strcmp(argv[i], "--list")) {
-			for (i = screen_first; i < screens; i++) {
-				get_sct_for_screen(i, crtc_specified);
-				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
-			}
+			run();
 			exit(0);
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
