@@ -41,7 +41,7 @@
 /* variables */
 static Display *dpy;
 static int temp = TEMPERATURE_NORM;
-static double brightness = -1.0;
+static double brightness = 1.0;
 
 static void usage(void)
 {
@@ -216,12 +216,12 @@ int main(int argc, char **argv)
 		} else if (!strcmp(argv[i], "-b")
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
+			if (brightness < 0.0)
+				brightness = 1.0;
 		} else
 			usage();
 
 	/* make sure values are correct */
-	if (brightness < 0.0)
-		brightness = 1.0;
 	if (temp == 0)
 		temp = TEMPERATURE_NORM;
 	else if (temp < TEMPERATURE_ZERO) {
