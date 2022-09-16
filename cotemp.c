@@ -178,18 +178,16 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	root = RootWindow(dpy, DefaultScreen(dpy));
-
-
 	screens = XScreenCount(dpy);
 	screen_first = 0;
 	screen_last = screens - 1;
 	screen_specified = -1;
 	crtc_specified = -1;
 
-	if (argc < 2) { // No arguments, so print estimated temperature for each screen
+	if (argc < 2) { /* no args, print info for every screen */
 		for (screen = screen_first; screen <= screen_last; screen++) {
 			get_sct_for_screen(screen, crtc_specified);
-			printf("Screen %d: temperature ~ %d %f\n", screen, temp, brightness);
+			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", screen, temp, brightness);
 		}
 		return EXIT_SUCCESS;
 	}
