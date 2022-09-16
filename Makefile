@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = cotemp.c
+SRC = cotemp.c util.c
 OBJ = ${SRC:.c=.o}
 
 all: options cotemp
@@ -31,7 +31,7 @@ clean:
 
 dist: clean
 	mkdir -p cotemp-${VERSION}
-	cp -R LICENSE Makefile README.md config.mk config.def.h ${SRC} cotemp.1 cotemp-${VERSION}
+	cp -R LICENSE Makefile README.md config.mk config.def.h util.h ${SRC} cotemp.1 cotemp-${VERSION}
 	tar -cf cotemp-${VERSION}.tar cotemp-${VERSION}
 	gzip cotemp-${VERSION}.tar
 	rm -rf cotemp-${VERSION}

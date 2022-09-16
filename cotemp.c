@@ -8,9 +8,9 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
+#include "util.h"
+
 /* macros */
-#define MAX(A, B)               ((A) > (B) ? (A) : (B))
-#define BETWEEN(X, A, B)        ((A) <= (X) && (X) <= (B))
 #define LENGTH(X)               (sizeof(X) / sizeof(X[0]))
 #ifdef DEBUG
 #define debug(...)              do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
@@ -57,10 +57,15 @@ static int screens = 1, screen_first = 0, crtc_specified = -1, fdelta = 0;
 
 #include "config.h"
 
+static void cleanup(void)
+{
+	if (dpy)
+		XCloseDisplay(dpy);
+}
+
 static void usage(void)
 {
-	fprintf(stderr, "usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]\n");
-	exit(0);
+	die("usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]\n");
 }
 
 static void hhmmfromstr(const char *data, int *h, int *m)
@@ -68,16 +73,12 @@ static void hhmmfromstr(const char *data, int *h, int *m)
 	char *ep;
 
 	*h = (int)strtol(data, &ep, 10);
-	if (!ep || *ep != ':') {
-		fprintf(stderr, "cannot parse hour: '%s' - wrong format\n", data);
-		exit(1);
-	}
+	if (!ep || *ep != ':')
+		die("cannot parse hour: '%s' - wrong format\n", data);
 
 	*m = (int)strtol(ep + 1, &ep, 10);
-	if (!ep || *ep != '\0') {
-		fprintf(stderr, "cannot parse minutes: '%s' - wrong format\n", data);
-		exit(1);
-	}
+	if (!ep || *ep != '\0')
+		die("cannot parse minutes: '%s' - wrong format\n", data);
 }
 
 static double DoubleTrim(double x, double a, double b)
@@ -230,11 +231,12 @@ int main(int argc, char *argv[])
 {
 	int i;
 
-	if (!(dpy = XOpenDisplay(NULL))) {
-		fprintf(stderr, "ERROR! Ensure DISPLAY is set correctly!\n");
-		return EXIT_FAILURE;
-	}
-	screens = XScreenCount(dpy);
+	if (atexit(cleanup) != 0) /* close dpy on exit */
+		die("atexit failed:");
+	if (!(dpy = XOpenDisplay(NULL)))
+		die("cotemp: cannot open display.");
+	if (!(screens = XScreenCount(dpy)))
+		die("cotemp: couldn't get screen count.");
 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
@@ -251,11 +253,8 @@ int main(int argc, char *argv[])
 		} else if (!strcmp(argv[i], "-s") /* select a screen */
 			|| !strcmp(argv[i], "--screen")) {
 			screen_first = atoi(argv[++i]);
-			if (screen_first >= screens) {
-				fprintf(stderr, "Invalid screen index: '%d'\n", screen_first);
-				XCloseDisplay(dpy);
-				return EXIT_FAILURE;
-			}
+			if (screen_first >= screens)
+				die("Invalid screen index: '%d'\n", screen_first);
 			screens = screen_first + 1;
 		} else if (!strcmp(argv[i], "-c") /* select a CRTC */
 			|| !strcmp(argv[i], "--crtc")) {
@@ -280,8 +279,7 @@ int main(int argc, char *argv[])
 				get_sct_for_screen(i, crtc_specified);
 				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
 			}
-			XCloseDisplay(dpy);
-			return EXIT_SUCCESS;
+			exit(0);
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
 			int found = 0;
@@ -303,6 +301,6 @@ int main(int argc, char *argv[])
 		sleep(interval);
 	}
 
-	XCloseDisplay(dpy);
+	cleanup();
 	return EXIT_SUCCESS;
 }
