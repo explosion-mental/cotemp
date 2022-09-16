@@ -1,45 +1,49 @@
 .TH COTEMP 1 cotemp-VERSION
-.SH NAME
-cotemp \- X11 set screen color temperature
-.SH SYNOPSIS
-.B cotemp
-[options]
-.I [temperature]
-.I [brightness]
+.SH "NAME"
+.PP
+cotemp - set the Color Temperature
+.SH "SYNOPSIS"
+.PP
+\fBcotemp\fP [ \fB-d\fP ] [ \fB-s\fP \fIscreen\fP ] [ \fB-c\fP \fIcrtc\fP ] [ \fB-t\fP \fItemperature\fP ] [ \fB-b\fP \fIbrightness\fP ]
+.SH "DESCRIPTION"
+.PP
+\fBcotemp\fP is a simple program that uses Xrandr to apply a color temperature.
+.br
 
-.SH DESCRIPTION
-.B cotemp
-sets the screen's color temperature.
+.PP
+It can also set the \fIbrightness\fP, or what someone would call it “\fIfake brightness\fP”,
+since \fBcotemp\fP doesn’t access the hardware to change that, rather it changes the
+values of the colors, giving them a darker tone all inside X11.
+.SH "OPTIONS"
+.PP
+Without any arguments, cotemp will print information about all the screens. If
+\fB-s\fP flag is not present, the properties will be applied to all screens.
 
-.SH OPTIONS
 .TP
-.B -h, --help
-Display usage information and exit
+\fB-b, --brightness brightness\fP
+Sets the linear brightness: [0.0 ... 1.0].
 .TP
-.B -v, --version
-Display version and exit.
-.TP
-.B -d, --delta
-Shift temperature by temperature value
-.TP
-.B -s, --screen N
-Zero-based index of screen to use.
-.TP
-.B -c, --crtc N
+\fB-c, --crtc CRTC\fP
 Zero-based index of CRTC to use.
 .TP
-.I [temperature]
-Black body temperature
-.br
-If the value is 0, cotemp sets the color temperature to the default of 6500
-.br
-If no arguments are passed, cotemp estimates the current display temperature and brightness
+\fB-d, --delta\fP
+Shift the temperature by the \fItemp\fP (\fB-t\fP) argument value.
 .TP
-.I [brightness]
-Linear brightness {0.0 .. 1.0}
-
-.SH AUTHOR
-cotemp is based on sct by Ted Unangst <tedu@openbsd.org>
-
-.SH SEE ALSO
+\fB-s, --screen screen\fP
+Zero-based index of which screen to use.
+.TP
+\fB-t, --temperature temp\fP
+Sets the temperature. Default value is \fB6500\fP and can’t be lower than \fB700\fP. If \fItemp\fP is \fB0\fP, default value is applied.
+.SH "CONFIGURATION"
+.PP
+cotemp is customized by creating a custom config.h and (re)compiling the source
+code. This keeps it simple, since reading a config file isn’t that hard (but
+adds unneeded complexity), and in many aspects more customizable. I try my best
+to comment about the variables in config.h, since they don’t do anything crazy,
+so it should be very straight foward what does what.
+.SH "SEE ALSO"
+.PP
 redshift(1), xtemp(1)
+.SH "BUGS"
+.PP
+\fIhttps://github.com/explosion-mental/cotemp\fP
