@@ -65,7 +65,7 @@ static void cleanup(void)
 
 static void usage(void)
 {
-	die("usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]\n");
+	die("usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]");
 }
 
 static void hhmmfromstr(const char *data, int *h, int *m)
@@ -74,11 +74,11 @@ static void hhmmfromstr(const char *data, int *h, int *m)
 
 	*h = (int)strtol(data, &ep, 10);
 	if (!ep || *ep != ':')
-		die("cannot parse hour: '%s' - wrong format\n", data);
+		die("cotemp: cannot parse hour: '%s' - wrong format.", data);
 
 	*m = (int)strtol(ep + 1, &ep, 10);
 	if (!ep || *ep != '\0')
-		die("cannot parse minutes: '%s' - wrong format\n", data);
+		die("cotemp: cannot parse minutes: '%s' - wrong format.", data);
 }
 
 static double DoubleTrim(double x, double a, double b)
