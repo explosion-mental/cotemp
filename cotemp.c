@@ -191,6 +191,7 @@ int main(int argc, char **argv)
 			get_sct_for_screen(screen, crtc_specified);
 			printf("Screen %d: temperature ~ %d %f\n", screen, temp, brightness);
 		}
+		return EXIT_SUCCESS;
 	}
 
 	for (i = 1; i < argc; i++)
