@@ -1,3 +1,5 @@
+/* See LICENSE file for copyright and license details. */
+
 static const Profile profiles[] = {
 	/* name          from             to      temperature  brightness */
 	{ "day",	"05:00",	"11:45",	6500,	1.0 },
