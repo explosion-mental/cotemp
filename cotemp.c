@@ -170,7 +170,7 @@ static void sct_for_screen(int screen, int icrtc)
 int main(int argc, char **argv)
 {
 	int i, screen, screens;
-	int screen_specified, screen_first, screen_last, crtc_specified;
+	int screen_first, screen_last, crtc_specified;
 	int fdelta = 0;
 
 	if (!(dpy = XOpenDisplay(NULL))) {
@@ -181,7 +181,6 @@ int main(int argc, char **argv)
 	screens = XScreenCount(dpy);
 	screen_first = 0;
 	screen_last = screens - 1;
-	screen_specified = -1;
 	crtc_specified = -1;
 
 	if (argc < 2) { /* no args, print info for every screen */
@@ -206,7 +205,11 @@ int main(int argc, char **argv)
 		/* these options take one argument */
 		} else if (!strcmp(argv[i], "-s")
 			|| !strcmp(argv[i], "--screen")) {
-			screen_specified = atoi(argv[++i]);
+			screen_first = screen_last = atoi(argv[++i]);
+			if (screen_first >= screens) {
+				fprintf(stderr, "Invalid screen index: '%d'\n", screen_first);
+				return EXIT_FAILURE;
+			}
 		} else if (!strcmp(argv[i], "-c")
 			|| !strcmp(argv[i], "--crtc")) {
 			crtc_specified = atoi(argv[++i]);
@@ -220,16 +223,8 @@ int main(int argc, char **argv)
 			usage();
 
 	/* make sure values are correct */
-	if (screen_specified >= screens) {
-		fprintf(stderr, "Invalid screen index: '%d'\n", screen_specified);
-		return EXIT_FAILURE;
-	}
 	if (brightness < 0.0)
 		brightness = 1.0;
-	if (screen_specified >= 0) {
-		screen_first = screen_specified;
-		screen_last = screen_specified;
-	}
 	if (temp == 0)
 		temp = TEMPERATURE_NORM;
 	else if (temp < TEMPERATURE_ZERO) {
