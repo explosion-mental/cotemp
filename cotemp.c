@@ -65,7 +65,7 @@ static void cleanup(void)
 
 static void usage(void)
 {
-	die("usage: cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]");
+	die("usage: cotemp [-dlv] [-s screen] [-c crtc] [-t temperature] [-b brightness] [-p profile]");
 }
 
 static void hhmmfromstr(const char *data, int *h, int *m)
