@@ -239,18 +239,14 @@ int main(int argc, char **argv)
 	}
 
 	/* run */
-	if (fdelta == 0) {
-		// Set temperature to given value or default for a value of 0
-		for (screen = screen_first; screen <= screen_last; screen++) {
-			sct_for_screen(screen, crtc_specified);
-		}
-	} else {
-		// Delta mode: Shift temperature of each screen by given value
-		for (screen = screen_first; screen <= screen_last; screen++) {
+
+	// Set temperature to given value or default for a value of 0
+	for (screen = screen_first; screen <= screen_last; screen++) {
+		if (fdelta) { // Delta mode: Shift temperature of each screen by given value
 			get_sct_for_screen(screen, crtc_specified);
 			temp += temp;
-			sct_for_screen(screen, crtc_specified);
 		}
+		sct_for_screen(screen, crtc_specified);
 	}
 
 	XCloseDisplay(dpy);
