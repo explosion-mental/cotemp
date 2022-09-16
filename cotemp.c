@@ -167,8 +167,7 @@ static void sct_for_screen(int screen, int icrtc)
 
 int main(int argc, char **argv)
 {
-	int i, screen, screens;
-	int screen_first, screen_last, crtc_specified;
+	int i, screens, screen_first = 0, crtc_specified = -1;
 	int fdelta = 0;
 
 	if (!(dpy = XOpenDisplay(NULL))) {
@@ -176,14 +175,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	screens = XScreenCount(dpy);
-	screen_first = 0;
-	screen_last = screens - 1;
-	crtc_specified = -1;
 
 	if (argc < 2) { /* no args, print info for every screen */
-		for (screen = screen_first; screen <= screen_last; screen++) {
-			get_sct_for_screen(screen, crtc_specified);
-			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", screen, temp, brightness);
+		for (i = screen_first; i < screens; i++) {
+			get_sct_for_screen(i, crtc_specified);
+			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
 		}
 		return EXIT_SUCCESS;
 	}
@@ -202,11 +198,12 @@ int main(int argc, char **argv)
 		/* these options take one argument */
 		} else if (!strcmp(argv[i], "-s")
 			|| !strcmp(argv[i], "--screen")) {
-			screen_first = screen_last = atoi(argv[++i]);
+			screen_first = atoi(argv[++i]);
 			if (screen_first >= screens) {
 				fprintf(stderr, "Invalid screen index: '%d'\n", screen_first);
 				return EXIT_FAILURE;
 			}
+			screens = screen_first + 1;
 		} else if (!strcmp(argv[i], "-c")
 			|| !strcmp(argv[i], "--crtc")) {
 			crtc_specified = atoi(argv[++i]);
@@ -230,12 +227,12 @@ int main(int argc, char **argv)
 	/* run */
 
 	// Set temperature to given value or default for a value of 0
-	for (screen = screen_first; screen <= screen_last; screen++) {
+	for (i = screen_first; i < screens; i++) {
 		if (fdelta) { // Delta mode: Shift temperature of each screen by given value
-			get_sct_for_screen(screen, crtc_specified);
+			get_sct_for_screen(i, crtc_specified);
 			temp += temp;
 		}
-		sct_for_screen(screen, crtc_specified);
+		sct_for_screen(i, crtc_specified);
 	}
 
 	XCloseDisplay(dpy);
