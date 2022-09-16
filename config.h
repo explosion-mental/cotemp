@@ -13,3 +13,6 @@ static const Profile profiles[] = {
 	{ "day",	"05:00",	"11:45",	6500,	1.0 },
 	{ "night",	"18:00",	"24:00",	3000,	0.7 },
 };
+
+/* seconds to sleep(3) before adjusting the screen */
+static const unsigned int interval = 60;

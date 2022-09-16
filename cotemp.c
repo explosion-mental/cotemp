@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
 #include <X11/Xlib.h>
@@ -297,8 +298,10 @@ int main(int argc, char *argv[])
 		} else
 			usage();
 
-	/* run */
-	run();
+	while (1) {
+		run();
+		sleep(interval);
+	}
 
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
