@@ -210,13 +210,13 @@ int main(int argc, char *argv[])
 		|| !strcmp(argv[i], "--version")) {
 			puts("cotemp-"VERSION);
 			exit(0);
-		} else if (!strcmp(argv[i], "-d")
+		} else if (!strcmp(argv[i], "-d") /* shift temperature value */
 			|| !strcmp(argv[i], "--delta")) {
 			fdelta = 1;
 		} else if (i + 1 == argc) {
 			usage();
 		/* these options take one argument */
-		} else if (!strcmp(argv[i], "-s")
+		} else if (!strcmp(argv[i], "-s") /* select a screen */
 			|| !strcmp(argv[i], "--screen")) {
 			screen_first = atoi(argv[++i]);
 			if (screen_first >= screens) {
@@ -225,10 +225,10 @@ int main(int argc, char *argv[])
 				return EXIT_FAILURE;
 			}
 			screens = screen_first + 1;
-		} else if (!strcmp(argv[i], "-c")
+		} else if (!strcmp(argv[i], "-c") /* select a CRTC */
 			|| !strcmp(argv[i], "--crtc")) {
 			crtc_specified = atoi(argv[++i]);
-		} else if (!strcmp(argv[i], "-t")
+		} else if (!strcmp(argv[i], "-t") /* set temperature */
 			|| !strcmp(argv[i], "--temperature")) {
 			temp = atoi(argv[++i]);
 			if (temp == 0)
@@ -237,12 +237,12 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", TEMPERATURE_ZERO, temp);
 				temp = TEMPERATURE_ZERO;
 			}
-		} else if (!strcmp(argv[i], "-b")
+		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
-		} else if (!strcmp(argv[i], "-l")
+		} else if (!strcmp(argv[i], "-l") /* output stats about screen(s) */
 			|| !strcmp(argv[i], "--list")) {
 			for (i = screen_first; i < screens; i++) {
 				get_sct_for_screen(i, crtc_specified);
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 			}
 			XCloseDisplay(dpy);
 			return EXIT_SUCCESS;
-		} else if (!strcmp(argv[i], "-p")
+		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
 			int found = 0;
 			char *name = argv[++i];
