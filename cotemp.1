@@ -4,7 +4,7 @@
 cotemp - set the Color Temperature
 .SH "SYNOPSIS"
 .PP
-\fBcotemp\fP [ \fB-d\fP ] [ \fB-s\fP \fIscreen\fP ] [ \fB-c\fP \fIcrtc\fP ] [ \fB-t\fP \fItemperature\fP ] [ \fB-b\fP \fIbrightness\fP ]
+\fBcotemp\fP [ \fB-dlv\fP ] [ \fB-s\fP \fIscreen\fP ] [ \fB-c\fP \fIcrtc\fP ] [ \fB-t\fP \fItemperature\fP ] [ \fB-b\fP \fIbrightness\fP ] [ \fB-p\fP \fIprofile\fP ]
 .SH "DESCRIPTION"
 .PP
 \fBcotemp\fP is a simple program that uses Xrandr to apply a color temperature.
@@ -16,12 +16,12 @@ since \fBcotemp\fP doesn’t access the hardware to change that, rather it chang
 values of the colors, giving them a darker tone all inside X11.
 .SH "OPTIONS"
 .PP
-Without any arguments, cotemp will print information about all the screens. If
-\fB-s\fP flag is not present, the properties will be applied to all screens.
+Without any arguments, cotemp will start to run every interval seconds forever.
+If \fB-s\fP flag is not present, the properties will be applied to all screens.
 
 .TP
 \fB-b, --brightness brightness\fP
-Sets the linear brightness: [0.0 ... 1.0].
+Sets the linear brightness and exits: [0.0 ... 1.0].
 .TP
 \fB-c, --crtc CRTC\fP
 Zero-based index of CRTC to use.
@@ -29,11 +29,20 @@ Zero-based index of CRTC to use.
 \fB-d, --delta\fP
 Shift the temperature by the \fItemp\fP (\fB-t\fP) argument value.
 .TP
+\fB-l, --list\fP
+Print current temperature and brightness of screen(s) and exits.
+.TP
 \fB-s, --screen screen\fP
 Zero-based index of which screen to use.
 .TP
 \fB-t, --temperature temp\fP
-Sets the temperature. Default value is \fB6500\fP and can’t be lower than \fB700\fP. If \fItemp\fP is \fB0\fP, default value is applied.
+Sets the temperature and exits. Default value is \fB6500\fP and can’t be lower than \fB700\fP. If \fItemp\fP is \fB0\fP, default value is applied.
+.TP
+\fB-p, --profile profilename\fP
+Sets the temperature and brightness of \fIprofilename\fP and exits.
+.TP
+\fB-v, --version\fP
+Prints the version and exits.
 .SH "CONFIGURATION"
 .PP
 cotemp is customized by creating a custom config.h and (re)compiling the source
