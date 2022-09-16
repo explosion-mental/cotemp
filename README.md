@@ -1,15 +1,20 @@
 cotemp - set the Color Temperature
 ==================================
 cotemp is a simple program that uses Xrandr to apply a color temperature and/or
-brightness on every screen, or by selecting one with `-s` flag.
+brightness on every screen, or by selecting one with `-s` flag, every 60
+seconds (by default).
+
+Depending on the hour and minute defined in a profile, it will switch to that
+profile using it's respective temperature and brightness.
+
+Profiles are located in config.h.
+
 
 Usage
 -----
-With no arguments cotemp will print information about the screens, outputing
-temperature and brightness. If the argument of `-t` or `--temperature` is
-**0**, the temperature will be set to default (no temperature).
+With no arguments cotemp will start to run (forever).
 
-    cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness]
+    cotemp [-d] [-s screen] [-c crtc] [-t temperature] [-b brightness] [-p profile]
 
 For a more detail information read the man page.
 
@@ -25,9 +30,11 @@ Afterwards enter the following command to build and install cotemp
 
 Credits
 =======
-- This is a fork of [sct](https://github.com/faf0/sct) in which I'll be adding
-  some nice things that I think make the program even easier and simple to use
-  but it will go out of the way of the original program.
+- This is a fork of [sct](https://github.com/faf0/sct) which implemented a lot
+  of things like:
+	* [Aproximation of the table of resfhit](https://github.com/faf0/sct/pull/10)
+	* iterate over all screens
+	* clean up code
 
 - Original code was published by Ted Unangst in the public domain:
   https://www.tedunangst.com/flak/post/sct-set-color-temperature
