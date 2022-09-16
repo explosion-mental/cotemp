@@ -204,15 +204,6 @@ int main(int argc, char *argv[])
 	}
 	screens = XScreenCount(dpy);
 
-	if (argc < 2) { /* no args, print info for every screen */
-		for (i = screen_first; i < screens; i++) {
-			get_sct_for_screen(i, crtc_specified);
-			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
-		}
-		XCloseDisplay(dpy);
-		return EXIT_SUCCESS;
-	}
-
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-v") /* prints version information */
@@ -251,6 +242,12 @@ int main(int argc, char *argv[])
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
+		} else if (!strcmp(argv[i], "-l")
+			|| !strcmp(argv[i], "--list")) {
+			for (i = screen_first; i < screens; i++) {
+				get_sct_for_screen(i, crtc_specified);
+				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
+			}
 		} else if (!strcmp(argv[i], "-p")
 			|| !strcmp(argv[i], "--profile")) {
 			int found = 0;
