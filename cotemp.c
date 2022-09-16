@@ -7,6 +7,7 @@
 
 /* macros */
 #define MAX(A, B)               ((A) > (B) ? (A) : (B))
+#define LENGTH(X)               (sizeof(X) / sizeof(X[0]))
 #ifdef DEBUG
 #define debug(...)              do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
 #else
@@ -36,10 +37,18 @@
 #define GAMMA_K0GB              1.49221604915144
 #define GAMMA_K1GB             -0.07513509588921
 
+typedef struct {
+	const char *name;
+	const int t;    /* temperature */
+	const double b; /* brigthness */
+} Profile;
+
 /* variables */
 static Display *dpy;
 static int temp = TEMPERATURE_NORM;
 static double brightness = 1.0;
+
+#include "config.h"
 
 static void usage(void)
 {
@@ -220,6 +229,19 @@ int main(int argc, char *argv[])
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
+		} else if (!strcmp(argv[i], "-p")
+			|| !strcmp(argv[i], "--profile")) {
+			int found = 0;
+			char *name = argv[++i];
+			for (int j = 0; j < LENGTH(profiles); j++)
+				if (!strcmp(name, profiles[j].name)) {
+					temp = profiles[j].t;
+					brightness = profiles[j].b;
+					found = 1;
+					break;
+				}
+			if (!found)
+				fprintf(stderr, "Profile '%s' not found.\n", name);
 		} else
 			usage();
 
