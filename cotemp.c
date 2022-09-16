@@ -231,16 +231,16 @@ int main(int argc, char **argv)
 		screen_first = screen_specified;
 		screen_last = screen_specified;
 	}
+	if (temp == 0)
+		temp = TEMPERATURE_NORM;
+	else if (temp < TEMPERATURE_ZERO) {
+		fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
+		temp = TEMPERATURE_ZERO;
+	}
 
 	/* run */
 	if (fdelta == 0) {
 		// Set temperature to given value or default for a value of 0
-		if (temp == 0) {
-			temp = TEMPERATURE_NORM;
-		} else if (temp < TEMPERATURE_ZERO) {
-			fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-			temp = TEMPERATURE_ZERO;
-		}
 		for (screen = screen_first; screen <= screen_last; screen++) {
 			sct_for_screen(screen, crtc_specified);
 		}
@@ -249,10 +249,6 @@ int main(int argc, char **argv)
 		for (screen = screen_first; screen <= screen_last; screen++) {
 			get_sct_for_screen(screen, crtc_specified);
 			temp += temp;
-			if (temp < TEMPERATURE_ZERO) {
-				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed.\n", TEMPERATURE_ZERO);
-				temp = TEMPERATURE_ZERO;
-			}
 			sct_for_screen(screen, crtc_specified);
 		}
 	}
