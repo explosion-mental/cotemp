@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
 				temp = LowestTemp;
 			}
-			run();
+			run(); 
 			exit(0);
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
