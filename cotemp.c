@@ -17,8 +17,6 @@
 #else
 #define debug(...)
 #endif /* DEBUG */
-#define TEMPERATURE_NORM        6500
-#define TEMPERATURE_ZERO        700
 #define GAMMA_MULT              65535.0
 #define BRIGHTHESS_DIV          65470.988
 
@@ -26,20 +24,22 @@
 // https://github.com/jonls/redshift/blob/04760afe31bff5b26cf18fe51606e7bdeac15504/src/colorramp.c#L30-L273
 // without limits:
 // GAMMA = K0 + K1 * ln(T - T0)
-// Red range (T0 = TEMPERATURE_ZERO)
+// Red range (T0 = LowestTemp)
 // Green color
 #define GAMMA_K0GR             -1.47751309139817
 #define GAMMA_K1GR              0.28590164772055
 // Blue color
 #define GAMMA_K0BR             -4.38321650114872
 #define GAMMA_K1BR              0.6212158769447
-// Blue range  (T0 = TEMPERATURE_NORM - TEMPERATURE_ZERO)
+// Blue range  (T0 = DefaultTemp - LowestTemp)
 // Red color
 #define GAMMA_K0RB              1.75390204039018
 #define GAMMA_K1RB             -0.1150805671482
 // Green color
 #define GAMMA_K0GB              1.49221604915144
 #define GAMMA_K1GB             -0.07513509588921
+
+enum { DefaultTemp = 6500, LowestTemp = 700 };
 
 typedef struct {
 	const char *name;
@@ -51,7 +51,7 @@ typedef struct {
 
 /* variables */
 static Display *dpy;
-static int temp = TEMPERATURE_NORM;
+static int temp = DefaultTemp;
 static double brightness = 1.0;
 static int screens = 1, screen_first = 0, crtc_specified = -1, fdelta = 0;
 
@@ -130,12 +130,12 @@ static void get_sct_for_screen(int screen, int icrtc)
 
 		if (gdelta < 0.0) {
 			if (gblue > 0.0) {
-				t = exp((ggreen + 1.0 + gdelta - (GAMMA_K0GR + GAMMA_K0BR)) / (GAMMA_K1GR + GAMMA_K1BR)) + TEMPERATURE_ZERO;
+				t = exp((ggreen + 1.0 + gdelta - (GAMMA_K0GR + GAMMA_K0BR)) / (GAMMA_K1GR + GAMMA_K1BR)) + LowestTemp;
 			} else {
-				t = (ggreen > 0.0) ? (exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR) + TEMPERATURE_ZERO) : TEMPERATURE_ZERO;
+				t = (ggreen > 0.0) ? (exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR) + LowestTemp) : LowestTemp;
 			}
 		} else {
-			t = exp((ggreen + 1.0 - gdelta - (GAMMA_K0GB + GAMMA_K0RB)) / (GAMMA_K1GB + GAMMA_K1RB)) + (TEMPERATURE_NORM - TEMPERATURE_ZERO);
+			t = exp((ggreen + 1.0 - gdelta - (GAMMA_K0GB + GAMMA_K0RB)) / (GAMMA_K1GB + GAMMA_K1RB)) + (DefaultTemp - LowestTemp);
 		}
 	} else
 		brightness = DoubleTrim(brightness, 0.0, 1.0);
@@ -151,18 +151,18 @@ static void sct_for_screen(int screen, int icrtc)
 	double g = 0.0, b = DoubleTrim(brightness, 0.0, 1.0);
 	double gred = 0.0, ggreen = 0.0, gblue = 0.0; /* gamma RGB */
 
-	if (temp < TEMPERATURE_NORM) {
+	if (temp < DefaultTemp) {
 		gred = 1.0;
-		if (temp < TEMPERATURE_ZERO) {
+		if (temp < LowestTemp) {
 			ggreen = 0.0;
 			gblue = 0.0;
 		} else {
-			g = log((double)temp - TEMPERATURE_ZERO);
+			g = log((double)temp - LowestTemp);
 			ggreen = DoubleTrim(GAMMA_K0GR + GAMMA_K1GR * g, 0.0, 1.0);
 			gblue = DoubleTrim(GAMMA_K0BR + GAMMA_K1BR * g, 0.0, 1.0);
 		}
 	} else {
-		g = log((double)temp - (TEMPERATURE_NORM - TEMPERATURE_ZERO));
+		g = log((double)temp - (DefaultTemp - LowestTemp));
 		gred = DoubleTrim(GAMMA_K0RB + GAMMA_K1RB * g, 0.0, 1.0);
 		ggreen = DoubleTrim(GAMMA_K0GB + GAMMA_K1GB * g, 0.0, 1.0);
 		gblue = 1.0;
@@ -264,10 +264,10 @@ int main(int argc, char *argv[])
 			|| !strcmp(argv[i], "--temperature")) {
 			temp = atoi(argv[++i]);
 			if (temp == 0)
-				temp = TEMPERATURE_NORM;
-			else if (temp < TEMPERATURE_ZERO) {
-				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", TEMPERATURE_ZERO, temp);
-				temp = TEMPERATURE_ZERO;
+				temp = DefaultTemp;
+			else if (temp < LowestTemp) {
+				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
+				temp = LowestTemp;
 			}
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
