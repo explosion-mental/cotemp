@@ -40,7 +40,6 @@
 
 /* variables */
 static Display *dpy;
-static Window root;
 static int temp = TEMPERATURE_NORM;
 static double brightness = -1.0;
 
@@ -58,8 +57,7 @@ static double DoubleTrim(double x, double a, double b)
 
 static void get_sct_for_screen(int screen, int icrtc)
 {
-	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
-
+	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
 	int n, c;
 	double t = 0.0;
 	double gammar = 0.0, gammag = 0.0, gammab = 0.0, gammad = 0.0;
@@ -113,9 +111,9 @@ static void get_sct_for_screen(int screen, int icrtc)
 
 static void sct_for_screen(int screen, int icrtc)
 {
-	double t = 0.0, b = 1.0, g = 0.0, gammar, gammag, gammab;
+	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
 	int n, c;
-	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
+	double t = 0.0, b = 1.0, g = 0.0, gammar, gammag, gammab;
 
 	t = (double)temp;
 	b = DoubleTrim(brightness, 0.0, 1.0);
@@ -177,7 +175,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERROR! Ensure DISPLAY is set correctly!\n");
 		return EXIT_FAILURE;
 	}
-	root = RootWindow(dpy, DefaultScreen(dpy));
 	screens = XScreenCount(dpy);
 	screen_first = 0;
 	screen_last = screens - 1;
