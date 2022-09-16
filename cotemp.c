@@ -181,6 +181,7 @@ int main(int argc, char **argv)
 			get_sct_for_screen(i, crtc_specified);
 			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
 		}
+		XCloseDisplay(dpy);
 		return EXIT_SUCCESS;
 	}
 
@@ -201,6 +202,7 @@ int main(int argc, char **argv)
 			screen_first = atoi(argv[++i]);
 			if (screen_first >= screens) {
 				fprintf(stderr, "Invalid screen index: '%d'\n", screen_first);
+				XCloseDisplay(dpy);
 				return EXIT_FAILURE;
 			}
 			screens = screen_first + 1;
