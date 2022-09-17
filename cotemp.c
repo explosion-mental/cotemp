@@ -300,7 +300,8 @@ int main(int argc, char *argv[])
 			if (!found)
 				die("Profile '%s' not found.", argv[i + 1]);
 			sct(flags);
-			exit(0);
+			die("Profile '%s' selected: temperature '%d' | brightness '%0.1f'",
+			    profiles[j].name, profiles[j].t, profiles[j].b);
 		} else
 			usage();
 
