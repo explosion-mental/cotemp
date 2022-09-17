@@ -235,7 +235,7 @@ static void setprofile(void)
 
 int main(int argc, char *argv[])
 {
-	int i, flags = 0;
+	int i, j, flags = 0, found = 0;
 
 	if (atexit(cleanup) != 0) /* close dpy on exit */
 		die("atexit failed:");
@@ -289,17 +289,16 @@ int main(int argc, char *argv[])
 			exit(0);
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
-			int found = 0;
-			char *name = argv[++i];
-			for (int j = 0; j < LENGTH(profiles); j++)
-				if (!strcmp(name, profiles[j].name)) {
+			for (j = 0; j < LENGTH(profiles); j++) {
+				if (!strcmp(argv[i + 1], profiles[j].name)) {
 					temp = profiles[j].t;
 					brightness = profiles[j].b;
 					found = 1;
 					break;
 				}
+			}
 			if (!found)
-				die("Profile '%s' not found.", name);
+				die("Profile '%s' not found.", argv[i + 1]);
 			sct(flags);
 			exit(0);
 		} else
