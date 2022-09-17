@@ -131,16 +131,13 @@ static void get_sct_for_screen(int screen, int icrtc)
 		gdelta = gblue - gred;
 
 		if (gdelta < 0.0) {
-			if (gblue > 0.0) {
-				t = exp((ggreen + 1.0 + gdelta - (GAMMA_K0GR + GAMMA_K0BR)) / (GAMMA_K1GR + GAMMA_K1BR)) + LowestTemp;
-			} else if (ggreen > 0.0) {
-				t = exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR) + LowestTemp;
-			} else {
-				t = LowestTemp;
-			}
-		} else {
+			t = LowestTemp;
+			if (gblue > 0.0)
+				t += exp((ggreen + 1.0 + gdelta - (GAMMA_K0GR + GAMMA_K0BR)) / (GAMMA_K1GR + GAMMA_K1BR));
+			else if (ggreen > 0.0)
+				t += exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR);
+		} else
 			t = exp((ggreen + 1.0 - gdelta - (GAMMA_K0GB + GAMMA_K0RB)) / (GAMMA_K1GB + GAMMA_K1RB)) + (DefaultTemp - LowestTemp);
-		}
 	} else
 		brightness = DoubleTrim(brightness, 0.0, 1.0);
 
