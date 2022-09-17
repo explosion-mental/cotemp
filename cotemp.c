@@ -222,6 +222,8 @@ static void setprofile(void)
 	/* get max value */
 	const Profile *p;
 	for (p = profiles; p < profiles + LENGTH(profiles); p++) {
+		if (!p->h1 || !p->h2)
+			continue;
 		hhmmfromstr(p->h1, &h, &min);
 		hhmmfromstr(p->h2, &h2, &min2);
 		if (BETWEEN(t->tm_hour * 60 + t->tm_min, h * 60 + min, h2 * 60 + min2)) {
