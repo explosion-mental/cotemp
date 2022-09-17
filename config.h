@@ -11,7 +11,7 @@
 static const Profile profiles[] = {
 	/* name          from             to      temperature  brightness */
 	{ "day",	"05:00",	"11:45",	6500,	1.0 },
-	{ "night",	"18:00",	"24:00",	3000,	0.7 },
+	{ "night",	"18:00",	"24:00",	4000,	0.9 },
 };
 
 /* seconds to sleep(3) before adjusting the screen */
