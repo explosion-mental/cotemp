@@ -196,9 +196,24 @@ static void sct_for_screen(int screen, int icrtc)
 	XFree(res);
 }
 
-static void run(void)
+static void sct(int delta, int info, int crtc, int first)
 {
 	int i;
+	/* Set temperature to given value or default for a value of 0 */
+	for (i = first; i < screens; i++) {
+		if (delta || info) /* Shift temperature of each screen by given value */
+			get_sct_for_screen(i, crtc);
+		if (delta)
+			temp += temp;
+		if (info)
+			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
+		else
+			sct_for_screen(i, crtc);
+	}
+}
+
+static void setprofile(void)
+{
 	const time_t caltime = time(NULL);
 	const struct tm *t = localtime(&caltime); /* broken down time */
 	int h, min, h2, min2;
@@ -214,16 +229,6 @@ static void run(void)
 			break;
 		}
 	}
-
-	// Set temperature to given value or default for a value of 0
-	for (i = screen_first; i < screens; i++) {
-		if (fdelta) { // Delta mode: Shift temperature of each screen by given value
-			get_sct_for_screen(i, crtc_specified);
-			temp += temp;
-		}
-		sct_for_screen(i, crtc_specified);
-	}
-
 }
 
 
@@ -249,10 +254,7 @@ int main(int argc, char *argv[])
 			fdelta = 1;
 		} else if (!strcmp(argv[i], "-l") /* output stats about screen(s) */
 			|| !strcmp(argv[i], "--list")) {
-			for (i = screen_first; i < screens; i++) {
-				get_sct_for_screen(i, crtc_specified);
-				printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
-			}
+			sct(fdelta, 1, crtc_specified, screen_first);
 			exit(0);
 		} else if (i + 1 == argc) {
 			usage();
@@ -275,14 +277,14 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
 				temp = LowestTemp;
 			}
-			run();
+			sct(fdelta, 0, crtc_specified, screen_first);
 			exit(0);
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
-			run();
+			sct(fdelta, 0, crtc_specified, screen_first);
 			exit(0);
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
@@ -297,13 +299,14 @@ int main(int argc, char *argv[])
 				}
 			if (!found)
 				die("Profile '%s' not found.", name);
-			run();
+			sct(fdelta, 0, crtc_specified, screen_first);
 			exit(0);
 		} else
 			usage();
 
 	while (1) {
-		run();
+		setprofile();
+		sct(fdelta, 0, crtc_specified, screen_first);
 		sleep(interval);
 	}
 
