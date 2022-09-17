@@ -91,21 +91,21 @@ static double DoubleTrim(double x, double a, double b)
 static void get_sct_for_screen(int screen, int icrtc)
 {
 	XRRCrtcGamma *cg;
-	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
+	XRRScreenResources *res;
 	int n, c;
 	double gdelta = 0.0, t = 0.0;
 	double gred = 0.0, ggreen = 0.0, gblue = 0.0; /* gamma RGB */
 
-	/* reset values */
-	temp = 0;
-	brightness = 1.0;
-
+	res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
 	n = res->ncrtc;
-
 	if (icrtc >= 0 && icrtc < n)
 		n = 1;
 	else
 		icrtc = 0;
+
+	/* reset values */
+	temp = 0;
+	brightness = 1.0;
 
 	for (c = icrtc; c < (icrtc + n); c++) {
 		cg = XRRGetCrtcGamma(dpy, res->crtcs[c]);
@@ -133,8 +133,10 @@ static void get_sct_for_screen(int screen, int icrtc)
 		if (gdelta < 0.0) {
 			if (gblue > 0.0) {
 				t = exp((ggreen + 1.0 + gdelta - (GAMMA_K0GR + GAMMA_K0BR)) / (GAMMA_K1GR + GAMMA_K1BR)) + LowestTemp;
+			} else if (ggreen > 0.0) {
+				t = exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR) + LowestTemp;
 			} else {
-				t = (ggreen > 0.0) ? (exp((ggreen - GAMMA_K0GR) / GAMMA_K1GR) + LowestTemp) : LowestTemp;
+				t = LowestTemp;
 			}
 		} else {
 			t = exp((ggreen + 1.0 - gdelta - (GAMMA_K0GB + GAMMA_K0RB)) / (GAMMA_K1GB + GAMMA_K1RB)) + (DefaultTemp - LowestTemp);
@@ -148,10 +150,17 @@ static void get_sct_for_screen(int screen, int icrtc)
 static void sct_for_screen(int screen, int icrtc)
 {
 	XRRCrtcGamma *cg;
-	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
+	XRRScreenResources *res;
 	int size, i, n, c;
 	double g = 0.0, b = DoubleTrim(brightness, 0.0, 1.0);
 	double gred = 0.0, ggreen = 0.0, gblue = 0.0; /* gamma RGB */
+
+	res = XRRGetScreenResourcesCurrent(dpy, RootWindow(dpy, screen));
+	n = res->ncrtc;
+	if (icrtc >= 0 && icrtc < n)
+		n = 1;
+	else
+		icrtc = 0;
 
 	if (temp < DefaultTemp) {
 		gred = 1.0;
@@ -171,13 +180,6 @@ static void sct_for_screen(int screen, int icrtc)
 	}
 
 	debug("Gamma: Red: %f | Green %f | Blue %f | Brightness: %f\n", gred, ggreen, gblue, b);
-
-	n = res->ncrtc;
-
-	if (icrtc >= 0 && icrtc < n)
-		n = 1;
-	else
-		icrtc = 0;
 
 	for (c = icrtc; c < (icrtc + n); c++) {
 		size = XRRGetCrtcGammaSize(dpy, res->crtcs[c]);
@@ -217,10 +219,10 @@ static void setprofile(void)
 {
 	const time_t caltime = time(NULL);
 	const struct tm *t = localtime(&caltime); /* broken down time */
+	const Profile *p;
 	int h, min, h2, min2;
 
 	/* get max value */
-	const Profile *p;
 	for (p = profiles; p < profiles + LENGTH(profiles); p++) {
 		if (!p->h1 || !p->h2)
 			continue;
