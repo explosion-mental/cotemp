@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 			|| !strcmp(argv[i], "--screen")) {
 			screen_first = atoi(argv[++i]);
 			if (screen_first >= screens)
-				die("Invalid screen index: '%d'\n", screen_first);
+				die("Invalid screen index: '%d'.", screen_first);
 			screens = screen_first + 1;
 		} else if (!strcmp(argv[i], "-c") /* select a CRTC */
 			|| !strcmp(argv[i], "--crtc")) {
