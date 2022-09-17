@@ -40,6 +40,7 @@
 #define GAMMA_K1GB             -0.07513509588921
 
 enum { DefaultTemp = 6500, LowestTemp = 700 };
+enum { FDelta = 1 , FInfo = 2 };
 
 typedef struct {
 	const char *name;
@@ -53,7 +54,7 @@ typedef struct {
 static Display *dpy;
 static int temp = DefaultTemp;
 static double brightness = 1.0;
-static int screens = 1, screen_first = 0, crtc_specified = -1, fdelta = 0;
+static int screens = 1, screen_first = 0, crtc_specified = -1;
 
 #include "config.h"
 
@@ -196,19 +197,19 @@ static void sct_for_screen(int screen, int icrtc)
 	XFree(res);
 }
 
-static void sct(int delta, int info, int crtc, int first)
+static void sct(int flags)
 {
 	int i;
 	/* Set temperature to given value or default for a value of 0 */
-	for (i = first; i < screens; i++) {
-		if (delta || info) /* Shift temperature of each screen by given value */
-			get_sct_for_screen(i, crtc);
-		if (delta)
+	for (i = screen_first; i < screens; i++) {
+		if (flags & (FDelta | FInfo)) /* Shift temperature of each screen by given value */
+			get_sct_for_screen(i, crtc_specified);
+		if (flags & FDelta)
 			temp += temp;
-		if (info)
+		if (flags & FInfo)
 			printf("Screen: %d\n\tTemperature: %d\n\tBrightness: %0.1f\n", i, temp, brightness);
 		else
-			sct_for_screen(i, crtc);
+			sct_for_screen(i, crtc_specified);
 	}
 }
 
@@ -234,7 +235,7 @@ static void setprofile(void)
 
 int main(int argc, char *argv[])
 {
-	int i;
+	int i, flags = 0;
 
 	if (atexit(cleanup) != 0) /* close dpy on exit */
 		die("atexit failed:");
@@ -251,10 +252,10 @@ int main(int argc, char *argv[])
 			exit(0);
 		} else if (!strcmp(argv[i], "-d") /* shift temperature value */
 			|| !strcmp(argv[i], "--delta")) {
-			fdelta = 1;
+			flags |= FDelta;
 		} else if (!strcmp(argv[i], "-l") /* output stats about screen(s) */
 			|| !strcmp(argv[i], "--list")) {
-			sct(fdelta, 1, crtc_specified, screen_first);
+			sct(flags | FInfo);
 			exit(0);
 		} else if (i + 1 == argc) {
 			usage();
@@ -277,14 +278,14 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
 				temp = LowestTemp;
 			}
-			sct(fdelta, 0, crtc_specified, screen_first);
+			sct(flags);
 			exit(0);
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
-			sct(fdelta, 0, crtc_specified, screen_first);
+			sct(flags);
 			exit(0);
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
@@ -299,14 +300,14 @@ int main(int argc, char *argv[])
 				}
 			if (!found)
 				die("Profile '%s' not found.", name);
-			sct(fdelta, 0, crtc_specified, screen_first);
+			sct(flags);
 			exit(0);
 		} else
 			usage();
 
 	while (1) {
 		setprofile();
-		sct(fdelta, 0, crtc_specified, screen_first);
+		sct(flags);
 		sleep(interval);
 	}
 
