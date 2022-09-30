@@ -11,7 +11,9 @@
 static const Profile profiles[] = {
 	/* name          from             to      temperature  brightness */
 	{ "day",	"05:00",	"11:45",	6500,	1.0 },
-	{ "night",	"18:00",	"24:00",	4000,	0.9 },
+	{ "even",	"17:00",	"18:45",	6000,	0.9 },
+	{ "night",	"18:45",	"20:00",	4000,	0.8 },
+	{ "latenight",	"20:00",	"24:00",	3000,	0.7 },
 	{ "coffee",	NULL   ,	NULL   ,	8000,	1.0 },
 	{ "storm",	NULL   ,	NULL   ,	2000,	1.0 },
 	{ "campfire",	NULL   ,	NULL   ,	4500,	1.0 },
