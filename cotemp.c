@@ -230,7 +230,11 @@ static void setprofile(void)
 
 int main(int argc, char *argv[])
 {
-	int i, j, flags = 0, found = 0, run_once = 0;
+	//TODO refactor logic into run()
+	//TODO --default flag to remove any tweaks
+	//XXX maybe save the previous values (brightness and temperature)
+	//    before running in order to restore them?
+	int i, j, flags = 0, found = 0, run_once = 0, no_prof = 0;
 
 	if (atexit(cleanup) != 0) /* close dpy on exit */
 		die("atexit failed:");
@@ -276,15 +280,15 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "WARNING! Temperatures below %d cannot be displayed, ignoring value '%d'\n", LowestTemp, temp);
 				temp = LowestTemp;
 			}
-			sct(flags);
-			exit(0);
+			run_once = 1;
+			no_prof = 1;
 		} else if (!strcmp(argv[i], "-b") /* set brightness */
 			|| !strcmp(argv[i], "--brightness")) {
 			brightness = atof(argv[++i]);
 			if (brightness < 0.0)
 				brightness = 1.0;
-			sct(flags);
-			exit(0);
+			run_once = 1;
+			no_prof = 1;
 		} else if (!strcmp(argv[i], "-p") /* select a profile */
 			|| !strcmp(argv[i], "--profile")) {
 			for (j = 0; j < LENGTH(profiles); j++) {
@@ -304,7 +308,8 @@ int main(int argc, char *argv[])
 			usage();
 
 	while (1) {
-		setprofile();
+		if (!no_prof)
+			setprofile();
 		sct(flags);
 		if (run_once)
 			exit(0);
