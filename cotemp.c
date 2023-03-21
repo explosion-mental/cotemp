@@ -236,7 +236,7 @@ static void setprofile(void)
 
 int main(int argc, char *argv[])
 {
-	int i, j, flags = 0, found = 0;
+	int i, j, flags = 0, found = 0, run_once = 0;
 
 	if (atexit(cleanup) != 0) /* close dpy on exit */
 		die("atexit failed:");
@@ -258,6 +258,9 @@ int main(int argc, char *argv[])
 			|| !strcmp(argv[i], "--list")) {
 			sct(flags | FInfo);
 			exit(0);
+		} else if (!strcmp(argv[i], "-r") /* don't run forever */
+			|| !strcmp(argv[i], "--run-once")) {
+			run_once = 1;
 		} else if (i + 1 == argc) {
 			usage();
 		/* these options take one argument */
@@ -309,6 +312,8 @@ int main(int argc, char *argv[])
 	while (1) {
 		setprofile();
 		sct(flags);
+		if (run_once)
+			exit(0);
 		sleep(interval);
 	}
 
