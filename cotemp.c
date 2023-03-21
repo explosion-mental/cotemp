@@ -11,12 +11,6 @@
 #include "util.h"
 
 /* macros */
-#define LENGTH(X)               (sizeof(X) / sizeof(X[0]))
-#ifdef DEBUG
-#define debug(...)              do { fprintf(stderr, "cotemp(debug): %s:\n", __func__); fprintf(stderr, "\t" __VA_ARGS__); } while (0)
-#else
-#define debug(...)
-#endif /* DEBUG */
 #define GAMMA_MULT              65535.0
 #define BRIGHTHESS_DIV          65470.988
 
